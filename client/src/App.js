@@ -5,23 +5,35 @@ class App extends Component {
     constructor() {
         super();
         this.state = {
-            dogs: []
         }
     }
 
-    componentDidMount () {
+    componentDidMount() {
         fetch('http://localhost:5000/northwest-1f72b/us-central1/app').then(
             results => results.json()).then(data => {
-                let dogs = [];
-                data.forEach(dog => {dogs.push(<div key={dog}>{dog}</div>)});
-                this.setState({dogs: dogs});
+                let displayed = data.map(dog => (<li className={"list-group-item"} key={dog}>{dog}</li>));
+            this.setState({all_dogs: data, displayed: displayed});
         });
+    }
+
+    filterChange = (evt) => {
+        let displayed = this.state.all_dogs.filter(dog => dog.includes(evt.target.value)).map(
+            dog => (<li className={"list-group-item"} key={dog}>{dog}</li>));
+        this.setState({displayed: displayed});
     }
 
     render() {
         return (
-            <div className="App">
-                {this.state.dogs}
+            <div className="container-fluid">
+                <form onSubmit={e => e.preventDefault()} action="#">
+                    <div className="form-group">
+                        <label htmlFor="filter">Filter list by:</label>
+                        <input className="form-control" onChange={this.filterChange} type="text" id="filter"></input>
+                    </div>
+                </form>
+                <ol className="list-group">
+                    {this.state.displayed}
+                </ol>
             </div>
         );
     }

@@ -10,20 +10,32 @@ class Breed extends Component {
     }
 
     onClick = (e) => {
+        e.preventDefault();
         const image = !this.state.showImage;
         this.setState({showImage: image});
-        e.preventDefault();
+        if (image) {
+            let splitBreed = this.props.breed.split(" ");
+            let url = "https://dog.ceo/api/breed/";
+            url += splitBreed.pop();
+            if (splitBreed.length > 0)
+                url += "/" + splitBreed.pop();
+            url += "/images/random";
+            fetch(url).then(
+                results => results.json()).then(data => {
+                this.setState({image: data.message});
+            });
+        }
     };
 
     render() {
         const imageTag = this.state.showImage ? (
-            <img src="https://dog.ceo/api/img/affenpinscher/n02110627_12819.jpg"></img>) : null;
-        return (
+            <img src={this.state.image} alt="Loading..." />) : null;
+        const visible = this.props.displayed ? (
             <a href="#" className="list-group-item list-group-item-action" onClick={this.onClick}>
                 {this.props.breed}
                 <div>{imageTag}</div>
-            </a>
-        )
+            </a>) : (<span></span>);
+        return visible
     }
 }
 

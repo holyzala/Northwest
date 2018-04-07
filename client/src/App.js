@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import './App.css';
+import Breed from './Breed';
 
 class App extends Component {
     constructor() {
@@ -11,7 +12,7 @@ class App extends Component {
     componentDidMount() {
         fetch('/api/list').then(
             results => results.json()).then(data => {
-                let displayed = data.map(dog => (<li className={"list-group-item"} key={dog}>{dog}</li>));
+                let displayed = data.map(dog => (<Breed breed={dog}/>));
             this.setState({all_dogs: data, displayed: displayed});
         });
     }
@@ -20,7 +21,7 @@ class App extends Component {
         let displayed = this.state.all_dogs.filter(dog => dog.includes(evt.target.value)).map(
             dog => (<li className={"list-group-item"} key={dog}>{dog}</li>));
         this.setState({displayed: displayed});
-    }
+    };
 
     render() {
         return (
@@ -31,9 +32,9 @@ class App extends Component {
                         <input className="form-control" onChange={this.filterChange} type="text" id="filter"></input>
                     </div>
                 </form>
-                <ol className="list-group">
+                <div className="list-group">
                     {this.state.displayed}
-                </ol>
+                </div>
             </div>
         );
     }

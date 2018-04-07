@@ -9,7 +9,7 @@ class App extends Component {
     }
 
     componentDidMount() {
-        fetch('/api').then(
+        fetch('/api/list').then(
             results => results.json()).then(data => {
                 let displayed = data.map(dog => (<li className={"list-group-item"} key={dog}>{dog}</li>));
             this.setState({all_dogs: data, displayed: displayed});

@@ -6,12 +6,20 @@ import (
 	"github.com/akutz/sortfold"
 	"log"
 	"net/http"
+	"time"
 )
 
 type DogsJSON struct {
 	Status string              `json:"status"`
 	Dogs   map[string][]string `json:"message"`
 }
+
+type JSONCache struct {
+	data DogsJSON
+	timestamp time.Time
+}
+
+var DogCache JSONCache
 
 func main() {
 	fs := http.FileServer(http.Dir("static"))
@@ -37,24 +45,27 @@ func arrayConvert(record DogsJSON) []string {
 }
 
 func getDogsJSON() DogsJSON {
-	var record DogsJSON
-	url := "https://dog.ceo/api/breeds/list/all"
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		log.Fatal("NewRequest: ", err)
-		return record
-	}
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Fatal("Do: ", err)
-		return record
-	}
-	defer resp.Body.Close()
+	if time.Since(DogCache.timestamp) > time.Duration(5)*time.Minute {
+		var record DogsJSON
+		url := "https://dog.ceo/api/breeds/list/all"
+		req, err := http.NewRequest("GET", url, nil)
+		if err != nil {
+			log.Fatal("NewRequest: ", err)
+			return record
+		}
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Fatal("Do: ", err)
+			return record
+		}
+		defer resp.Body.Close()
 
-	if err := json.NewDecoder(resp.Body).Decode(&record); err != nil {
-		log.Println(err)
+		if err := json.NewDecoder(resp.Body).Decode(&record); err != nil {
+			log.Println(err)
+		}
+		DogCache = JSONCache{record, time.Now().UTC()}
 	}
 
-	return record
+	return DogCache.data
 }
